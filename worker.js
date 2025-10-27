@@ -1,5 +1,4 @@
 import { handleProxyRequest, handleOptionsRequest } from './cf/proxy-core.js';
-import { sha256 } from './public/js/sha256.js';
 
 const PASSWORD_PLACEHOLDER = 'window.__ENV__.PASSWORD = "{{PASSWORD}}";';
 
@@ -56,4 +55,15 @@ async function injectPasswordIntoHtml(html, env) {
   }
 
   return html.replace(PASSWORD_PLACEHOLDER, replacement);
+}
+
+async function sha256(message) {
+  const subtle = globalThis.crypto && globalThis.crypto.subtle;
+  if (!subtle) {
+    throw new Error('crypto.subtle 不可用，无法计算密码哈希');
+  }
+  const data = new TextEncoder().encode(message);
+  const hashBuffer = await subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }

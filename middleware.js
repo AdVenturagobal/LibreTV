@@ -1,5 +1,3 @@
-import { sha256 } from './public/js/sha256.js'; // 需新建或引入SHA-256实现
-
 // Vercel Middleware to inject environment variables
 export default async function middleware(request) {
   // Get the URL from the request
@@ -51,3 +49,16 @@ export default async function middleware(request) {
 export const config = {
   matcher: ['/', '/((?!api|_next/static|_vercel|favicon.ico).*)'],
 };
+
+async function sha256(message) {
+  const subtle = globalThis.crypto && globalThis.crypto.subtle;
+  if (!subtle) {
+    // fallback for local dev where middleware may run in Node
+    const { createHash } = await import('crypto');
+    return createHash('sha256').update(message).digest('hex');
+  }
+  const data = new TextEncoder().encode(message);
+  const hashBuffer = await subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}

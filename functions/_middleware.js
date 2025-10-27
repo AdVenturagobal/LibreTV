@@ -1,5 +1,3 @@
-import { sha256 } from '../public/js/sha256.js';
-
 export async function onRequest(context) {
   const { request, env, next } = context;
   const response = await next();
@@ -27,4 +25,15 @@ export async function onRequest(context) {
   }
   
   return response;
+}
+
+async function sha256(message) {
+  const subtle = globalThis.crypto && globalThis.crypto.subtle;
+  if (!subtle) {
+    throw new Error('crypto.subtle 不可用，无法计算密码哈希');
+  }
+  const data = new TextEncoder().encode(message);
+  const hashBuffer = await subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
