@@ -1,4 +1,4 @@
-import { sha256 } from '../js/sha256.js';
+import { sha256 } from '../public/js/sha256.js';
 
 export async function onRequest(context) {
   const { request, env, next } = context;
@@ -17,8 +17,10 @@ export async function onRequest(context) {
     html = html.replace('window.__ENV__.PASSWORD = "{{PASSWORD}}";', 
       `window.__ENV__.PASSWORD = "${passwordHash}";`);
     
+    const headers = new Headers(response.headers);
+    headers.delete('content-length');
     return new Response(html, {
-      headers: response.headers,
+      headers,
       status: response.status,
       statusText: response.statusText,
     });

@@ -1,4 +1,4 @@
-import { sha256 } from './js/sha256.js'; // 需新建或引入SHA-256实现
+import { sha256 } from './public/js/sha256.js'; // 需新建或引入SHA-256实现
 
 // Vercel Middleware to inject environment variables
 export default async function middleware(request) {
@@ -38,10 +38,13 @@ export default async function middleware(request) {
   );
 
   // 修复Response构造
+  const headers = new Headers(response.headers);
+  headers.delete('content-length');
+
   return new Response(modifiedHtml, {
     status: response.status,
     statusText: response.statusText,
-    headers: response.headers
+    headers
   });
 }
 

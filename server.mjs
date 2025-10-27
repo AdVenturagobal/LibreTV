@@ -12,6 +12,8 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const staticDir = path.join(__dirname, 'public');
+
 const config = {
   port: process.env.PORT || 8080,
   password: process.env.PASSWORD || '',
@@ -52,7 +54,8 @@ function sha256Hash(input) {
   });
 }
 
-async function renderPage(filePath, password) {
+async function renderPage(relativePath, password) {
+  const filePath = path.join(staticDir, relativePath);
   let content = fs.readFileSync(filePath, 'utf8');
   if (password !== '') {
     const sha256 = await sha256Hash(password);
@@ -68,10 +71,10 @@ app.get(['/', '/index.html', '/player.html'], async (req, res) => {
     let filePath;
     switch (req.path) {
       case '/player.html':
-        filePath = path.join(__dirname, 'player.html');
+        filePath = 'player.html';
         break;
       default: // '/' 和 '/index.html'
-        filePath = path.join(__dirname, 'index.html');
+        filePath = 'index.html';
         break;
     }
     
@@ -85,8 +88,7 @@ app.get(['/', '/index.html', '/player.html'], async (req, res) => {
 
 app.get('/s=:keyword', async (req, res) => {
   try {
-    const filePath = path.join(__dirname, 'index.html');
-    const content = await renderPage(filePath, config.password);
+    const content = await renderPage('index.html', config.password);
     res.send(content);
   } catch (error) {
     console.error('搜索页面渲染错误:', error);
@@ -222,7 +224,7 @@ app.get('/proxy/:encodedUrl', async (req, res) => {
   }
 });
 
-app.use(express.static(path.join(__dirname), {
+app.use(express.static(staticDir, {
   maxAge: config.cacheMaxAge
 }));
 

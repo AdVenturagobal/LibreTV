@@ -1,8 +1,7 @@
 # netlify.toml
 
 [build]
-  # 如果你的项目不需要构建步骤 (纯静态 + functions)，可以省略 publish
-  # publish = "." # 假设你的 HTML/CSS/JS 文件在根目录
+  publish = "public"
   functions = "netlify/functions" # 指定 Netlify 函数目录
 
 # 配置 Edge Functions
